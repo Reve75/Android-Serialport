@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * Author
- * Created Time 2017/12/14.
+ * Created Time 2017/12/14. http://docs.fitfithealth.com.cn/app-debug.apk
  */
 public class LogListAdapter extends BaseQuickAdapter<String, BaseViewHolder> {
 

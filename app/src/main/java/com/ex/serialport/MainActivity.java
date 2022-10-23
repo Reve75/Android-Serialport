@@ -1,6 +1,8 @@
 package com.ex.serialport;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -24,6 +26,8 @@ import com.ex.serialport.adapter.SpAdapter;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android_serialport_api.SerialPortFinder;
 import tp.xmaihh.serialport.SerialHelper;
@@ -35,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recy;
     private Spinner spSerial;
     private EditText edInput;
-    private Button btSend;
+    private Button btSend, btSend2;
     private RadioGroup radioGroup;
     private RadioButton radioButton1;
     private RadioButton radioButton2;
@@ -48,6 +52,12 @@ public class MainActivity extends AppCompatActivity {
     private Spinner spParity;
     private Spinner spStopb;
     private Spinner spFlowcon;
+
+    private Handler mHandler;
+
+    private int mInterval = 3000; // 5 seconds by default, can be changed later
+
+    private Timer timer = new Timer();
 
     @Override
     protected void onDestroy() {
@@ -65,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
         btSend = (Button) findViewById(R.id.btn_send);
         spBote = (Spinner) findViewById(R.id.sp_baudrate);
         btOpen = (Button) findViewById(R.id.btn_open);
+        btSend2 = (Button) findViewById(R.id.aaa);
 
         radioGroup = (RadioGroup) findViewById(R.id.radioGroup);
         radioButton1 = (RadioButton) findViewById(R.id.radioButton1);
@@ -80,8 +91,11 @@ public class MainActivity extends AppCompatActivity {
         recy.setAdapter(logListAdapter);
         recy.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
 
+
+        mHandler = new Handler();
+
         serialPortFinder = new SerialPortFinder();
-        serialHelper = new SerialHelper("dev/ttyS1", 115200) {
+        serialHelper = new SerialHelper("dev/ttyS4", 9600) {
             @Override
             protected void onDataReceived(final ComBean comBean) {
                 runOnUiThread(new Runnable() {
@@ -89,16 +103,21 @@ public class MainActivity extends AppCompatActivity {
                     public void run() {
                         if (radioGroup.getCheckedRadioButtonId() == R.id.radioButton1) {
                             try {
-                                Toast.makeText(getBaseContext(), new String(comBean.bRec, "UTF-8"), Toast.LENGTH_SHORT).show();
+                                //Toast.makeText(getBaseContext(), new String(comBean.bRec, "UTF-8"), Toast.LENGTH_SHORT).show();
                                 logListAdapter.addData(comBean.sRecTime + ":   " + new String(comBean.bRec, "UTF-8"));
                                 if (logListAdapter.getData() != null && logListAdapter.getData().size() > 0) {
                                     recy.smoothScrollToPosition(logListAdapter.getData().size());
                                 }
+
+                                //if (new String(comBean.bRec) == "FF05010105") {
+                                //    byte[] command3 = new byte[]{(byte) 0x24, (byte) 0x04, (byte) 0x01, (byte) 0xDE};
+                                //    serialHelper.send(command3);
+                                //}
                             } catch (UnsupportedEncodingException e) {
                                 e.printStackTrace();
                             }
                         } else {
-                            Toast.makeText(getBaseContext(), ByteUtil.ByteArrToHex(comBean.bRec), Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(getBaseContext(), ByteUtil.ByteArrToHex(comBean.bRec), Toast.LENGTH_SHORT).show();
                             logListAdapter.addData(comBean.sRecTime + ":   " + ByteUtil.ByteArrToHex(comBean.bRec));
                             if (logListAdapter.getData() != null && logListAdapter.getData().size() > 0) {
                                 recy.smoothScrollToPosition(logListAdapter.getData().size());
@@ -231,6 +250,35 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 try {
                     serialHelper.open();
+                    final Runnable mStatusChecker = new Runnable() {
+                        byte[] command = new byte[]{(byte) 0xF0, (byte) 0x04, (byte) 0xF1, (byte) 0xFA};
+                        @Override
+                        public void run() {
+                            try {
+                                //serialHelper.sendHex("F0");  // 发送Hex
+                                //serialHelper.sendHex("04");
+                                //serialHelper.sendHex("F1");
+                                //serialHelper.sendHex("FA");
+                                serialHelper.send(command);
+                                //serialHelper.sendHex("F0");
+                                //Log.i("sent","bytes");
+                                //outputStream.write(hexStringToBytes("F004F1FA"));
+                            }
+
+                            catch (Exception e) {
+                                Log.e("cannot write:", e.toString());
+                            }
+
+
+                            finally {
+                                // 100% guarantee that this always happens, even if
+                                // your update method throws an exception
+                                mHandler.postDelayed(this, mInterval);
+                            }
+                        }
+                    };
+                    mStatusChecker.run();
+
                     btOpen.setEnabled(false);
                 } catch (IOException e) {
                     Toast.makeText(MainActivity.this, "msg: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -257,7 +305,33 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     if (edInput.getText().toString().length() > 0) {
                         if (serialHelper.isOpen()) {
-                            serialHelper.sendHex(edInput.getText().toString());
+                            //serialHelper.sendHex(edInput.getText().toString());
+
+                            //byte[] command = new byte[]{(byte) 0xF0, (byte) 0x04, (byte) 0xF1, (byte) 0xFA};
+                            //serialHelper.send(command);
+
+                            byte[] command0 = new byte[]{(byte) 0x20, (byte) 0x04, (byte) 0xFF, (byte) 0x24};
+                            byte[] command1 = new byte[]{(byte) 0x20, (byte) 0x04, (byte) 0x01, (byte) 0xDA};
+                            byte[] command2 = new byte[]{(byte) 0x21, (byte) 0x04, (byte) 0xFF, (byte) 0x25};
+                            serialHelper.send(command1);
+                            timer.schedule(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    serialHelper.send(command2);
+                                    Log.i("byte command", "sent");
+                                }
+                            },10000);
+
+                            timer.schedule(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    byte[] command3 = new byte[]{(byte) 0x24, (byte) 0x04, (byte) 0x01, (byte) 0xDE};
+                                    serialHelper.send(command3);
+                                    Log.i("weight command", "sent");
+                                }
+                            },20000);
+
+
                         } else {
                             Toast.makeText(getBaseContext(), "串口没打开", Toast.LENGTH_SHORT).show();
                         }
@@ -267,6 +341,58 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        /*
+        btSend2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    byte[] command3 = new byte[]{(byte) 0x24, (byte) 0x04, (byte) 0x01, (byte) 0xDE};
+                    serialHelper.send(command3);
+                }catch (Exception e) {
+                    Log.e("error sending","to get weight");
+                }
+            }
+        });
+
+         */
+        /*
+        try {
+            serialHelper.open();
+        }catch (Exception e) {
+            Log.e("port","fail to open");
+        }
+
+        final Runnable mStatusChecker = new Runnable() {
+            byte[] command = new byte[]{(byte) 0xF0, (byte) 0x04, (byte) 0xF1, (byte) 0xFA};
+            @Override
+            public void run() {
+                try {
+                    //serialHelper.sendHex("F0");  // 发送Hex
+                    //serialHelper.sendHex("04");
+                    //serialHelper.sendHex("F1");
+                    //serialHelper.sendHex("FA");
+                    serialHelper.send(command);
+                    //serialHelper.sendHex("F0");
+                    //Log.i("sent","bytes");
+                    //outputStream.write(hexStringToBytes("F004F1FA"));
+                }
+
+                catch (Exception e) {
+                    Log.e("cannot write:", e.toString());
+                }
+
+
+                finally {
+                    // 100% guarantee that this always happens, even if
+                    // your update method throws an exception
+                    mHandler.postDelayed(this, mInterval);
+                }
+            }
+        };
+        mStatusChecker.run();
+
+         */
     }
 
     @Override

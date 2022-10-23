@@ -168,23 +168,23 @@
         app:layout_constraintTop_toTopOf="@+id/sp_stopbits" />
 
     <EditText
-        android:id="@+id/ed_input"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/x50"
-        android:layout_marginStart="@dimen/x8"
-        android:layout_marginLeft="@dimen/x8"
-        android:layout_marginTop="@dimen/x8"
-        android:layout_marginEnd="@dimen/x8"
-        android:layout_marginRight="@dimen/x8"
-        android:layout_marginBottom="@dimen/x8"
-        android:maxLines="1"
-        android:text="123456"
-        android:textSize="@dimen/sp_14"
-        app:layout_constraintBottom_toBottomOf="@+id/btn_send"
-        app:layout_constraintEnd_toStartOf="@+id/btn_open"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/btn_send" />
-
+            android:id="@+id/ed_input"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/x50"
+            android:layout_marginStart="@dimen/x8"
+            android:layout_marginLeft="@dimen/x8"
+            android:layout_marginTop="@dimen/x8"
+            android:layout_marginEnd="@dimen/x8"
+            android:layout_marginRight="@dimen/x8"
+            android:layout_marginBottom="@dimen/x8"
+            android:maxLines="1"
+            android:text="123456"
+            android:textSize="@dimen/sp_14"
+            app:layout_constraintBottom_toBottomOf="@+id/btn_send"
+            app:layout_constraintEnd_toStartOf="@+id/btn_open"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/btn_send" app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintVertical_bias="0.555"/>
     <Button
         android:id="@+id/btn_open"
         android:layout_width="wrap_content"
@@ -196,13 +196,24 @@
         app:layout_constraintEnd_toStartOf="@+id/btn_send" />
 
     <Button
-        android:id="@+id/btn_send"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginRight="@dimen/x8"
-        android:layout_marginBottom="@dimen/x8"
-        android:text="发送"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+            android:id="@+id/btn_send"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="108dp"
+            android:layout_marginBottom="8dp"
+            android:text="发送"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="108dp"/>
+
+
+    <Button
+            android:id="@+id/aaa"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="16dp"
+            android:layout_marginBottom="8dp"
+            android:text="发送2"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="16dp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
